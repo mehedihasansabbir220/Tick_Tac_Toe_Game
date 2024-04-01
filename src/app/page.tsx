@@ -1,8 +1,8 @@
-"use client";
-
+"use client"
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { createWinner, getLeaderboard } from "../../services/apiService";
 
 type BoxType = {
   boxNo: number;
@@ -33,6 +33,7 @@ export default function Home() {
   const [oChances, setOChances] = useState<number[]>([]);
   const [zChances, setZChances] = useState<number[]>([]);
   const [win, setWin] = useState<"X" | "O" | "Z" | "Draw" | null>(null);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   function checkWinningCondition(array: number[]) {
     for (const winState of winningStates) {
@@ -53,6 +54,20 @@ export default function Home() {
   }
 
   useEffect(() => {
+    updateLeaderboard();
+  }, []);
+
+  function updateLeaderboard() {
+    getLeaderboard()
+      .then((data) => {
+        setLeaderboard(data);
+      })
+      .catch((error) => {
+        console.error('Error fetching leaderboard:', error);
+      });
+  }
+
+  useEffect(() => {
     const xWin = checkWinningCondition(xChances);
     const oWin = checkWinningCondition(oChances);
     const zWin = checkWinningCondition(zChances);
@@ -62,6 +77,18 @@ export default function Home() {
     else if (oWin) setWin("O");
     else if (zWin) setWin("Z");
     else if (!xWin && !oWin && !zWin && allBoxesFill) setWin("Draw");
+
+    if (xWin || oWin || zWin || allBoxesFill) {
+      const winnerSymbol = xWin ? "X" : oWin ? "O" : zWin ? "Z" : "Draw";
+      createWinner(winnerSymbol, 100) // Assuming a fixed score for each winner, you can adjust this as needed
+        .then(() => {
+          console.log('Winner created successfully');
+          updateLeaderboard();
+        })
+        .catch((error) => {
+          console.error('Error creating winner:', error);
+        });
+    }
   }, [xChances, oChances, zChances]);
 
   function handleOnClickBox(boxNumber: number) {
@@ -110,6 +137,16 @@ export default function Home() {
           {win === "X" && <p>X Win</p>}
           {win === "Z" && <p>Z Win</p>}
           {win === "Draw" && <p>Draw</p>}
+        </section>
+        <section>
+          <h2 className="text-2xl font-bold">Leaderboard</h2>
+          <ul>
+            {leaderboard.map((winner, index) => (
+              <li key={index}>
+                {winner.playerName} - {winner.score}
+              </li>
+            ))}
+          </ul>
         </section>
       </main>
     </div>
