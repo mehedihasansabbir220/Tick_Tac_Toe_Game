@@ -42,3 +42,8 @@
    - Contributions are welcome! Feel free to open issues or pull requests on GitHub.
 
 # Tick_Tac_Toe_Game
+# tick BE 
+- Updated API_BASE_URL to allow customization for different API URLs.
+- Improved error handling in createWinner and getLeaderboard functions.
+- Added useEffect hooks to automatically update the leaderboard and check winning conditions.
+- Updated createWinner function to include a fixed score for each winner and update leaderboard after creating a winner.
